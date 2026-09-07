@@ -23,4 +23,28 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+private:
+	UPROPERTY()
+	TObjectPtr<class UDSObject> Obj;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 Hp = 100;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 Mp = 50;
+
+	UPROPERTY(EditAnywhere)
+	float Speed = 3.5f;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UStaticMeshComponent> Box;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed = 50.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RotationRate = 45.0f;
 };
