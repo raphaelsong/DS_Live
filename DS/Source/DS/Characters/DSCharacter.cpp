@@ -55,6 +55,7 @@ void ADSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (EnhancedInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADSCharacter::Input_Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADSCharacter::Input_Look);
 	}
 }
 
@@ -70,5 +71,13 @@ void ADSCharacter::Input_Move(const FInputActionValue& InputValue)
 
 	AddMovementInput(ForwardVector, MovementVector.X);
 	AddMovementInput(RightVector, MovementVector.Y);
+}
+
+void ADSCharacter::Input_Look(const FInputActionValue& InputValue)
+{
+	FVector2D LookVector = InputValue.Get<FVector2D>();
+
+	AddControllerYawInput(LookVector.X);
+	AddControllerPitchInput(LookVector.Y);
 }
 

@@ -40,6 +40,7 @@ protected:
 #pragma region InputSystem
 public:
 	void Input_Move(const FInputActionValue& InputValue);
+	void Input_Look(const FInputActionValue& InputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -47,5 +48,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<UInputAction> LookAction;
 #pragma endregion
 };
