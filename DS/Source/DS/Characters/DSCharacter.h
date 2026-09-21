@@ -30,6 +30,33 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+/** 캐릭터의 관련 기능 */
+public:
+	bool IsMoving();
+	bool IsSpringing();
+
+protected:
+	/** 질주 속도*/
+	UPROPERTY(EditAnywhere, Category = Sprinting)
+	float SprintingSpeed = 700.0f;
+
+	/** 일반 속도*/
+	UPROPERTY(EditAnywhere, Category = Sprinting)
+	float NormalSpeed = 350.0f;
+
+	/** 기본적인 스테미나 사용량*/
+	UPROPERTY(EditAnywhere, Category = Sprinting)
+	float BaseStaminaCost = 0.1f;
+
+	UPROPERTY(VisibleAnywhere, Category = Sprinting)
+	bool bSprinting = false;
+
+/** 캐릭터의 컴포넌트들*/
+protected:
+	// 각종 스탯 관리
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UDSAttributeComponent> AttributeComponent;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
@@ -42,6 +69,10 @@ public:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Look(const FInputActionValue& InputValue);
 
+	void Sprinting();
+	void StopSprint();
+	void Rolling();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
@@ -51,5 +82,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<UInputAction> LookAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<UInputAction> SprintRollingAction;
 #pragma endregion
 };
