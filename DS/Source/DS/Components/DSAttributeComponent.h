@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DSDefine.h"
 #include "Components/ActorComponent.h"
 #include "DSAttributeComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FDelegateOnAttributeChanged, EDSAttributeType, float);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DS_API UDSAttributeComponent : public UActorComponent
@@ -36,6 +38,14 @@ public:
 
 	/** 스태미나 재충전 처리 핸드링 함수*/
 	void RegenerateStaminaHandler();
+
+// 델리게이트 관련
+public:
+	void BroadcastAttributeChanged(EDSAttributeType InAttributeType) const;
+
+public:
+	/** 스탯 변경 Delegate */
+	FDelegateOnAttributeChanged OnAttributeChanged;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Stamina)

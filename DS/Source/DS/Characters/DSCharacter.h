@@ -51,6 +51,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Sprinting)
 	bool bSprinting = false;
 
+/** UI Section*/
+protected:
+	UPROPERTY(EditAnywhere, Category = UI)
+	TSubclassOf<UUserWidget> WBP_PlayerHUDWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UDSPlayerHUDWidget> PlayerHUDWidget;
+
 /** 캐릭터의 컴포넌트들*/
 protected:
 	// 각종 스탯 관리

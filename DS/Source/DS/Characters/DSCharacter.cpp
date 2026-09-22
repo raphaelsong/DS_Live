@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/DSAttributeComponent.h"
+#include "UI/DSPlayerHUDWidget.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -44,6 +45,16 @@ void ADSCharacter::BeginPlay()
 		if (Subsystem)
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
+	if (WBP_PlayerHUDWidget)
+	{
+		PlayerHUDWidget = CreateWidget<UDSPlayerHUDWidget>(GetWorld(), WBP_PlayerHUDWidget);
+
+		if (PlayerHUDWidget)
+		{
+			PlayerHUDWidget->AddToViewport();
 		}
 	}
 }
