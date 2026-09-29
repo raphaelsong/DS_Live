@@ -131,8 +131,6 @@ void ADSCharacter::Sprinting()
 		AttributeComponent->DecreaseStamina(BaseStaminaCost);
 
 		AttributeComponent->ToggleStaminaRegen(false);
-		
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Magenta, FString::Printf(TEXT("Stamina : %f"), AttributeComponent->GetBaseStamina()));
 	}
 	else
 	{
@@ -151,6 +149,21 @@ void ADSCharacter::StopSprint()
 
 void ADSCharacter::Rolling()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("Rolling"));
+	check(AttributeComponent);
+
+	if (AttributeComponent->CheckHasEnoughStamina(RollingStaminaCost))
+	{
+		// 스태미나 충전 멈춤
+		AttributeComponent->ToggleStaminaRegen(false);
+
+		// 스태미나 차감
+		AttributeComponent->DecreaseStamina(RollingStaminaCost);
+
+		// 롤링 애니메이션 재생(AM_Rolling_Forward)
+		PlayAnimMontage(RollingMontage);
+
+		// 스태미나 충전 시작
+		AttributeComponent->ToggleStaminaRegen(true);
+	}
 }
 

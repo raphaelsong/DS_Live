@@ -51,6 +51,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Sprinting)
 	bool bSprinting = false;
 
+	/** 롤링 스테미나 사용량 */
+	UPROPERTY(EditAnywhere, Category = Rolling)
+	float RollingStaminaCost = 15.0f;
+
+/** Animation Section*/
+protected:
+	UPROPERTY(EditAnywhere, Category = Montage)
+	TObjectPtr<class UAnimMontage> RollingMontage;
+
 /** UI Section*/
 protected:
 	UPROPERTY(EditAnywhere, Category = UI)
