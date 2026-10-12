@@ -93,6 +93,7 @@ public:
 	void Sprinting();
 	void StopSprint();
 	void Rolling();
+	void Interact();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -106,5 +107,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<UInputAction> SprintRollingAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<UInputAction> InteractAction;
 #pragma endregion
 };

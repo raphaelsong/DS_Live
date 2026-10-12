@@ -11,6 +11,8 @@
 #include "Components/DSStateComponent.h"
 #include "UI/DSPlayerHUDWidget.h"
 #include "DSGameplayTags.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "DSDefine.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -83,6 +85,7 @@ void ADSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(SprintRollingAction, ETriggerEvent::Triggered, this, &ADSCharacter::Sprinting);
 		EnhancedInputComponent->BindAction(SprintRollingAction, ETriggerEvent::Completed, this, &ADSCharacter::StopSprint);
 		EnhancedInputComponent->BindAction(SprintRollingAction, ETriggerEvent::Canceled, this, &ADSCharacter::Rolling);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ADSCharacter::Interact);
 	}
 }
 
@@ -190,5 +193,32 @@ void ADSCharacter::Rolling()
 		// 스태미나 충전 시작
 		AttributeComponent->ToggleStaminaRegen(true);
 	}
+}
+
+void ADSCharacter::Interact()
+{
+	FHitResult OutHit;
+	const FVector Start = GetActorLocation();
+	const FVector End = Start;
+	const float Radius = 100.0f;
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_OBJECT_INTERACTION));
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
+	bool bHit = UKismetSystemLibrary::SphereTraceSingleForObjects(
+		this,
+		Start,
+		End,
+		Radius,
+		ObjectTypes,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::ForDuration,
+		OutHit,
+		true
+	);
 }
 
