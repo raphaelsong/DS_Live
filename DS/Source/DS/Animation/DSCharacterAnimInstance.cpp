@@ -4,6 +4,7 @@
 #include "Animation/DSCharacterAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/DSStateComponent.h"
 
 UDSCharacterAnimInstance::UDSCharacterAnimInstance()
 {
@@ -34,5 +35,14 @@ void UDSCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bShouldMove = GroundSpeed > 3.0f && MovementComponent->GetCurrentAcceleration() != FVector::ZeroVector;
 
 		bIsFalling = MovementComponent->IsFalling();
+	}
+}
+
+void UDSCharacterAnimInstance::AnimNotify_ResetMovementInput()
+{
+	UDSStateComponent* StateComponent = GetOwningActor()->GetComponentByClass<UDSStateComponent>();
+	if (StateComponent)
+	{
+		StateComponent->ToggleMovementInput(true);
 	}
 }

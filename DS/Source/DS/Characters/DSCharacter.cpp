@@ -8,7 +8,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/DSAttributeComponent.h"
+#include "Components/DSStateComponent.h"
 #include "UI/DSPlayerHUDWidget.h"
+#include "DSGameplayTags.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -29,6 +31,7 @@ ADSCharacter::ADSCharacter()
 
 	// 캐릭터 컴포넌트
 	AttributeComponent = CreateDefaultSubobject<UDSAttributeComponent>(TEXT("Attribute"));
+	StateComponent = CreateDefaultSubobject<UDSStateComponent>(TEXT("State"));
 
 }
 
@@ -101,6 +104,13 @@ bool ADSCharacter::IsSpringing()
 
 void ADSCharacter::Input_Move(const FInputActionValue& InputValue)
 {
+	check(StateComponent);
+
+	if (StateComponent->MovementInputEnabled() == false)
+	{
+		return;
+	}
+
 	FVector2D MovementVector = InputValue.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -150,9 +160,24 @@ void ADSCharacter::StopSprint()
 void ADSCharacter::Rolling()
 {
 	check(AttributeComponent);
+	check(StateComponent);
+
+	// 롤링 중 롤링 금지
+	FGameplayTagContainer RollingTag;
+	RollingTag.AddTag(DSGameplayTags::Character_State_Rolling);
+	if (StateComponent->IsCurrentStateEqualToAny(RollingTag))
+	{
+		return;
+	}
 
 	if (AttributeComponent->CheckHasEnoughStamina(RollingStaminaCost))
 	{
+		// 이동 입력 처리 무시
+		StateComponent->ToggleMovementInput(false);
+
+		// 롤링 상태 설정
+		StateComponent->SetState(DSGameplayTags::Character_State_Rolling);
+
 		// 스태미나 충전 멈춤
 		AttributeComponent->ToggleStaminaRegen(false);
 
