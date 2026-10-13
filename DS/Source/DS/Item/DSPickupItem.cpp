@@ -3,6 +3,7 @@
 
 #include "Item/DSPickupItem.h"
 #include "DSDefine.h"
+#include "Equipments/DSEquipment.h"
 
 // Sets default values
 ADSPickupItem::ADSPickupItem()
@@ -31,6 +32,16 @@ void ADSPickupItem::BeginPlay()
 void ADSPickupItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+
+	if (EquipmentClass)
+	{
+		ADSEquipment* EquipmentItem = EquipmentClass->GetDefaultObject<ADSEquipment>();
+		if (EquipmentItem)
+		{
+			Mesh->SetStaticMesh(EquipmentItem->GetMeshAsset());
+			Mesh->SetSimulatePhysics(true);
+		}
+	}
 }
 
 // Called every frame
@@ -43,5 +54,16 @@ void ADSPickupItem::Tick(float DeltaTime)
 void ADSPickupItem::Interact(AActor* Interaction)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Pickup Item"));
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = Interaction;
+
+	ADSEquipment* SpawnItem = GetWorld()->SpawnActor<ADSEquipment>(EquipmentClass, GetActorTransform(), SpawnParams);
+
+	if (SpawnItem)
+	{
+		SpawnItem->EquipItem();
+		Destroy();
+	}
 }
 

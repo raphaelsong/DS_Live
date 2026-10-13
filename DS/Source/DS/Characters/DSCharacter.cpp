@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/DSAttributeComponent.h"
 #include "Components/DSStateComponent.h"
+#include "Components/DSCombatComponent.h"
 #include "UI/DSPlayerHUDWidget.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Interface/DSItemInterface.h"
@@ -35,7 +36,7 @@ ADSCharacter::ADSCharacter()
 	// 캐릭터 컴포넌트
 	AttributeComponent = CreateDefaultSubobject<UDSAttributeComponent>(TEXT("Attribute"));
 	StateComponent = CreateDefaultSubobject<UDSStateComponent>(TEXT("State"));
-
+	CombatComponet = CreateDefaultSubobject<UDSCombatComponent>(TEXT("Combat"));
 }
 
 // Called when the game starts or when spawned

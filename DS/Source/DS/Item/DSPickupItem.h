@@ -28,7 +28,13 @@ public:
 public:
 	virtual void Interact(AActor* Interaction) override;
 
+public:
+	FORCEINLINE void SetEquipmentClass(TSubclassOf<class ADSEquipment> NewEquipmentClass) { EquipmentClass = NewEquipmentClass; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
 	TObjectPtr<class UStaticMeshComponent> Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	TSubclassOf<class ADSEquipment> EquipmentClass;
 };
