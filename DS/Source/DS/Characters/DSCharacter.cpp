@@ -2,6 +2,8 @@
 
 
 #include "Characters/DSCharacter.h"
+#include "DSDefine.h"
+#include "DSGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -10,9 +12,8 @@
 #include "Components/DSAttributeComponent.h"
 #include "Components/DSStateComponent.h"
 #include "UI/DSPlayerHUDWidget.h"
-#include "DSGameplayTags.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "DSDefine.h"
+#include "Interface/DSItemInterface.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -220,5 +221,18 @@ void ADSCharacter::Interact()
 		OutHit,
 		true
 	);
+
+	if (bHit)
+	{
+		AActor* HitActor = OutHit.GetActor();
+		if (HitActor)
+		{
+			IDSItemInterface* Interaction = Cast<IDSItemInterface>(HitActor);
+			if (Interaction)
+			{
+				Interaction->Interact(this);
+			}
+		}
+	}
 }
 

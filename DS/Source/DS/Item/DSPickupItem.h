@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/DSItemInterface.h"
 #include "DSPickupItem.generated.h"
 
 UCLASS()
-class DS_API ADSPickupItem : public AActor
+class DS_API ADSPickupItem : public AActor, public IDSItemInterface
 {
 	GENERATED_BODY()
 	
@@ -23,6 +24,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+public:
+	virtual void Interact(AActor* Interaction) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)

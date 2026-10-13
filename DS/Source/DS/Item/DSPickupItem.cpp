@@ -40,3 +40,8 @@ void ADSPickupItem::Tick(float DeltaTime)
 
 }
 
+void ADSPickupItem::Interact(AActor* Interaction)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Pickup Item"));
+}
+
