@@ -24,10 +24,19 @@ public:
 	FORCEINLINE FName GetEquipSocketName() const { return EquipSocketName; }
 	FORCEINLINE FName GetUnEquipSocketName() const { return UnequipSocketName; }
 
+	FORCEINLINE UAnimMontage* GetEquipMontage() const { return EquipMontageAnimation; }
+	FORCEINLINE UAnimMontage* GetUnequipMontage() const { return UnequipMontageAnimation; }
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment | Socket")
 	FName EquipSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment | Socket")
 	FName UnequipSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment | Animation")
+	TObjectPtr<UAnimMontage> EquipMontageAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment | Animation")
+	TObjectPtr<UAnimMontage> UnequipMontageAnimation;
 };

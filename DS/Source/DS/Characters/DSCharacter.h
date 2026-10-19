@@ -34,6 +34,7 @@ public:
 public:
 	bool IsMoving();
 	bool IsSpringing();
+	bool CanToggleCombat() const;
 
 protected:
 	/** 질주 속도*/
@@ -98,6 +99,10 @@ public:
 	void StopSprint();
 	void Rolling();
 	void Interact();
+	void ToggleCombat();
+
+	void ComboAttack();
+	void SpecialAttack();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -114,5 +119,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<UInputAction> InteractAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<UInputAction> ToggleCombatAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<UInputAction> AttackAction;
 #pragma endregion
 };

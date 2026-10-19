@@ -31,7 +31,15 @@ public:
 public:
 	void SetWeapon(ADSWeapon* NewWeapon);
 
+public:
+	FORCEINLINE bool IsCombatEnabled() const				{ return bCombatEnabled;		}
+	FORCEINLINE void SetCombatEnabled(const bool bEnabled)	{ bCombatEnabled = bEnabled;	}
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<ADSWeapon> MainWeapon;
+
+	/* 전투 활성화 상태인지?*/
+	UPROPERTY(EditAnywhere)
+	bool bCombatEnabled = false;
 };

@@ -46,3 +46,12 @@ void UDSCharacterAnimInstance::AnimNotify_ResetMovementInput()
 		StateComponent->ToggleMovementInput(true);
 	}
 }
+
+void UDSCharacterAnimInstance::AnimNotify_ResetState()
+{
+	UDSStateComponent* StateComponent = GetOwningActor()->GetComponentByClass<UDSStateComponent>();
+	if (StateComponent)
+	{
+		StateComponent->ClearState();
+	}
+}

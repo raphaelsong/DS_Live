@@ -18,6 +18,8 @@ void ADSWeapon::EquipItem()
 	{
 		CombatComponent->SetWeapon(this);
 
-		AttachToOwner(UnequipSocketName);
+		const FName AttachSocket = CombatComponent->IsCombatEnabled() ? EquipSocketName : UnequipSocketName;
+
+		AttachToOwner(AttachSocket);
 	}
 }

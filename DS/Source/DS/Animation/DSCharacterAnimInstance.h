@@ -25,6 +25,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_ResetMovementInput();
 
+	UFUNCTION()
+	void AnimNotify_ResetState();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "References")
 	TObjectPtr<class ACharacter> OwnerCharacter;

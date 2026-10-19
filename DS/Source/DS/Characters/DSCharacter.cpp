@@ -15,6 +15,7 @@
 #include "UI/DSPlayerHUDWidget.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Interface/DSItemInterface.h"
+#include "Equipments/DSWeapon.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -88,6 +89,10 @@ void ADSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(SprintRollingAction, ETriggerEvent::Completed, this, &ADSCharacter::StopSprint);
 		EnhancedInputComponent->BindAction(SprintRollingAction, ETriggerEvent::Canceled, this, &ADSCharacter::Rolling);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ADSCharacter::Interact);
+		EnhancedInputComponent->BindAction(ToggleCombatAction, ETriggerEvent::Triggered, this, &ADSCharacter::ToggleCombat);
+
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Canceled, this, &ADSCharacter::ComboAttack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ADSCharacter::SpecialAttack);
 	}
 }
 
@@ -105,6 +110,18 @@ bool ADSCharacter::IsMoving()
 bool ADSCharacter::IsSpringing()
 {
 	return bSprinting;
+}
+
+bool ADSCharacter::CanToggleCombat() const
+{
+	check(StateComponent);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(DSGameplayTags::Character_State_Attacking);
+	CheckTags.AddTag(DSGameplayTags::Character_State_Rolling);
+	CheckTags.AddTag(DSGameplayTags::Character_State_GeneralAction);
+
+	return (StateComponent->IsCurrentStateEqualToAny(CheckTags) == false);
 }
 
 void ADSCharacter::Input_Move(const FInputActionValue& InputValue)
@@ -235,5 +252,39 @@ void ADSCharacter::Interact()
 			}
 		}
 	}
+}
+
+void ADSCharacter::ToggleCombat()
+{
+	check(CombatComponet);
+	check(StateComponent);
+
+	const ADSWeapon* Weapon = CombatComponet->GetMainWeapon();
+	if (Weapon)
+	{
+		if (CanToggleCombat())
+		{
+			StateComponent->SetState(DSGameplayTags::Character_State_GeneralAction);
+
+			if (CombatComponet->IsCombatEnabled())
+			{
+				PlayAnimMontage(Weapon->GetUnequipMontage());
+			}
+			else
+			{
+				PlayAnimMontage(Weapon->GetEquipMontage());
+			}
+		}
+	}
+}
+
+void ADSCharacter::ComboAttack()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("CombatAttack"));
+}
+
+void ADSCharacter::SpecialAttack()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("SpecialAttack"));
 }
 
