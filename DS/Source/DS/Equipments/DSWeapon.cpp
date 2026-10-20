@@ -3,6 +3,7 @@
 
 #include "Equipments/DSWeapon.h"
 #include "Components/DSCombatComponent.h"
+#include "Data/DSMontageActionData.h"
 
 ADSWeapon::ADSWeapon()
 {
@@ -22,4 +23,24 @@ void ADSWeapon::EquipItem()
 
 		AttachToOwner(AttachSocket);
 	}
+}
+
+UAnimMontage* ADSWeapon::GetMontageForTag(const FGameplayTag& GroupTag, const int32 Index)
+{
+	if (MontageActionData)
+	{
+		return MontageActionData->GetMontageGroupForTag(GroupTag, Index);
+	}
+
+	return nullptr;
+}
+
+float ADSWeapon::GetStaminaCost(const FGameplayTag& InTag) const
+{
+	if (MontageActionData)
+	{
+		return MontageActionData->GetStaminaCost(InTag);
+	}
+
+	return 0.0f;
 }

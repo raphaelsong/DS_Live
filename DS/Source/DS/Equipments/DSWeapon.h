@@ -4,11 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Equipments/DSEquipment.h"
+#include "GameplayTagContainer.h"
 #include "DSWeapon.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class DS_API ADSWeapon : public ADSEquipment
 {
@@ -19,6 +17,10 @@ public:
 
 public:
 	virtual void EquipItem() override;
+
+public:
+	UAnimMontage* GetMontageForTag(const FGameplayTag& GroupTag, const int32 Index = 0);
+	float GetStaminaCost(const FGameplayTag& InTag) const;
 
 public:
 	FORCEINLINE FName GetEquipSocketName() const { return EquipSocketName; }
@@ -39,4 +41,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment | Animation")
 	TObjectPtr<UAnimMontage> UnequipMontageAnimation;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment | Animation")
+	TObjectPtr<class UDSMontageActionData> MontageActionData;
 };

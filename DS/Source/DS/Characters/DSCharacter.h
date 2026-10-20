@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
 #include "DSCharacter.generated.h"
 
 struct FInputActionValue;
@@ -35,6 +36,33 @@ public:
 	bool IsMoving();
 	bool IsSpringing();
 	bool CanToggleCombat() const;
+	bool CanPerformAttack(const FGameplayTag& AttackTypeTag) const;
+
+/** 공격 관련 기능*/
+public:
+	// 콤보 실행
+	void ExecuteComboAttack(const FGameplayTag& AttackTypeTag);
+
+	// 공격 실행
+	void DoAttack(const FGameplayTag& AttackTypeTag);
+
+	// 콤보 초기화
+	void ResetCombo();
+
+public:
+	// 콤보 윈도우
+	void EnableComboWindow();
+	void DisableComboWindow();
+
+protected:
+	// 콤보 입력 가능?
+	bool bCanComboInput = false;
+
+	// 콤보 카운터
+	int32 ComboCounter = 0;
+
+	// 콤보 입력 여부
+	bool bSavedComboInput = false;
 
 protected:
 	/** 질주 속도*/
