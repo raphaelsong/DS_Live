@@ -3,10 +3,14 @@
 
 #include "Equipments/DSWeapon.h"
 #include "Components/DSCombatComponent.h"
+#include "Components/DSWeaponCollisionComponent.h"
 #include "Data/DSMontageActionData.h"
 
 ADSWeapon::ADSWeapon()
 {
+	WeaponCollisionComponent = CreateDefaultSubobject<UDSWeaponCollisionComponent>(TEXT("WeaponCollision"));
+
+	WeaponCollisionComponent->OnHitActor.AddUObject(this, &ADSWeapon::OnHitActor);
 }
 
 void ADSWeapon::EquipItem()
@@ -22,6 +26,12 @@ void ADSWeapon::EquipItem()
 		const FName AttachSocket = CombatComponent->IsCombatEnabled() ? EquipSocketName : UnequipSocketName;
 
 		AttachToOwner(AttachSocket);
+
+		if (WeaponCollisionComponent)
+		{
+			WeaponCollisionComponent->SetWeaponMesh(Mesh);
+			WeaponCollisionComponent->AddIgnoreActor(GetOwner());
+		}
 	}
 }
 
@@ -43,4 +53,25 @@ float ADSWeapon::GetStaminaCost(const FGameplayTag& InTag) const
 	}
 
 	return 0.0f;
+}
+
+void ADSWeapon::TurnOnWeaponCollision()
+{
+	if (WeaponCollisionComponent)
+	{
+		WeaponCollisionComponent->TurnOnCollision();
+	}
+}
+
+void ADSWeapon::TurnOffWeaponCollision()
+{
+	if (WeaponCollisionComponent)
+	{
+		WeaponCollisionComponent->TurnOffCollision();
+	}
+}
+
+void ADSWeapon::OnHitActor(const FHitResult& Hit)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("OutHitActor"));
 }
