@@ -2,11 +2,35 @@
 
 
 #include "Components/DSAttributeComponent.h"
+#include "Components/DSStateComponent.h"
+#include "DSGameplayTags.h"
 
 // Sets default values for this component's properties
 UDSAttributeComponent::UDSAttributeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UDSAttributeComponent::TakeDamageAmount(float DamageAmount)
+{
+	BaseHealth = FMath::Clamp(BaseHealth - DamageAmount, 0.0f, MaxHealth);
+
+	BroadcastAttributeChanged(EDSAttributeType::Health);
+
+	if (BaseHealth <= 0.0f)
+	{
+		// Á×À½ ¾Ë¸²
+		if (OnDeath.IsBound())
+		{
+			OnDeath.Broadcast();
+		}
+
+		UDSStateComponent* StateComponent = GetOwner()->FindComponentByClass<UDSStateComponent>();
+		if (StateComponent)
+		{
+			StateComponent->SetState(DSGameplayTags::Character_State_Death);
+		}
+	}
 }
 
 bool UDSAttributeComponent::CheckHasEnoughStamina(float StaminaCost) const
@@ -60,6 +84,7 @@ void UDSAttributeComponent::BroadcastAttributeChanged(EDSAttributeType InAttribu
 			Ratio = GetStaminaRatio();
 			break;
 		case EDSAttributeType::Health:
+			Ratio = GetHealthRatio();
 			break;
 		default:
 			break;

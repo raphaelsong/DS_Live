@@ -9,6 +9,8 @@
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FDelegateOnAttributeChanged, EDSAttributeType, float);
 
+DECLARE_MULTICAST_DELEGATE(FDelegateOnDeath);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DS_API UDSAttributeComponent : public UActorComponent
 {
@@ -25,6 +27,16 @@ public:
 
 	/** 스테미나 비율 계산*/
 	FORCEINLINE float GetStaminaRatio() const { return BaseStamina / MaxStamina; }
+
+	/** 체력 Getter */
+	FORCEINLINE float GetBaseHealth() const { return BaseHealth; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+
+	/** 체력 비율 계산 */
+	FORCEINLINE float GetHealthRatio() const { return BaseHealth / MaxHealth; }
+
+public:
+	void TakeDamageAmount(float DamageAmount);
 
 public:
 	/**스테미나가 충분한지 체크*/
@@ -47,7 +59,16 @@ public:
 	/** 스탯 변경 Delegate */
 	FDelegateOnAttributeChanged OnAttributeChanged;
 
+	/** 죽음 알림 Delegate */
+	FDelegateOnDeath OnDeath;
+
 protected:
+	UPROPERTY(EditAnywhere, Category = Health)
+	float BaseHealth = 100.0f;
+
+	UPROPERTY(EditAnywhere, Category = Health)
+	float MaxHealth = 100.0f;
+
 	UPROPERTY(EditAnywhere, Category = Stamina)
 	float BaseStamina = 100.0f;
 

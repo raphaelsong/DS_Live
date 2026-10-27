@@ -5,6 +5,7 @@
 #include "Components/DSCombatComponent.h"
 #include "Components/DSWeaponCollisionComponent.h"
 #include "Data/DSMontageActionData.h"
+#include "Kismet/GameplayStatics.h"
 
 ADSWeapon::ADSWeapon()
 {
@@ -73,5 +74,18 @@ void ADSWeapon::TurnOffWeaponCollision()
 
 void ADSWeapon::OnHitActor(const FHitResult& Hit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("OutHitActor"));
+	AActor* TargetActor = Hit.GetActor();
+
+	FVector DamageDirection = GetOwner()->GetActorForwardVector();
+
+	float AttackDamage = 30.f;
+
+	UGameplayStatics::ApplyPointDamage(
+		TargetActor,
+		AttackDamage,
+		DamageDirection,
+		Hit,
+		GetOwner()->GetInstigatorController(),
+		this,
+		nullptr);
 }
