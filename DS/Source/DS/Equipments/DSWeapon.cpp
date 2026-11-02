@@ -6,9 +6,12 @@
 #include "Components/DSWeaponCollisionComponent.h"
 #include "Data/DSMontageActionData.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "DSGameplayTags.h"
 ADSWeapon::ADSWeapon()
 {
+	DamageMultiplierMap.Add(DSGameplayTags::Character_Attack_Light, 1.2f);
+	DamageMultiplierMap.Add(DSGameplayTags::Character_Attack_Special, 1.75f);
+
 	WeaponCollisionComponent = CreateDefaultSubobject<UDSWeaponCollisionComponent>(TEXT("WeaponCollision"));
 
 	WeaponCollisionComponent->OnHitActor.AddUObject(this, &ADSWeapon::OnHitActor);
@@ -56,6 +59,23 @@ float ADSWeapon::GetStaminaCost(const FGameplayTag& InTag) const
 	return 0.0f;
 }
 
+float ADSWeapon::GetAttackDamage() const
+{
+	const AActor* OwnerActor = GetOwner();
+	if (OwnerActor)
+	{
+		const FGameplayTag LastAttackTag = GetLastAttackType();
+
+		if (DamageMultiplierMap.Contains(LastAttackTag))
+		{
+			const float Multiplier = DamageMultiplierMap[LastAttackTag];
+			return BaseDamage * Multiplier;
+		}
+	}
+
+	return BaseDamage;
+}
+
 void ADSWeapon::TurnOnWeaponCollision()
 {
 	if (WeaponCollisionComponent)
@@ -78,7 +98,7 @@ void ADSWeapon::OnHitActor(const FHitResult& Hit)
 
 	FVector DamageDirection = GetOwner()->GetActorForwardVector();
 
-	float AttackDamage = 30.f;
+	float AttackDamage = GetAttackDamage();
 
 	UGameplayStatics::ApplyPointDamage(
 		TargetActor,

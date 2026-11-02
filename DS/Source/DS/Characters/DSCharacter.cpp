@@ -16,6 +16,11 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Interface/DSItemInterface.h"
 #include "Equipments/DSWeapon.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -36,6 +41,8 @@ ADSCharacter::ADSCharacter()
 
 	// 캐릭터 컴포넌트
 	AttributeComponent = CreateDefaultSubobject<UDSAttributeComponent>(TEXT("Attribute"));
+	AttributeComponent->OnDeath.AddUObject(this, &ADSCharacter::OnDeath);
+
 	StateComponent = CreateDefaultSubobject<UDSStateComponent>(TEXT("State"));
 	CombatComponet = CreateDefaultSubobject<UDSCombatComponent>(TEXT("Combat"));
 }
@@ -96,6 +103,128 @@ void ADSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	}
 }
 
+float ADSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (AttributeComponent)
+	{
+		AttributeComponent->TakeDamageAmount(ActualDamage);
+	}
+
+	StateComponent->SetState(DSGameplayTags::Character_State_Hit);
+	StateComponent->ToggleMovementInput(false);
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+
+		// 데미지 방향
+		FVector ShotDirection = PointDamageEvent->ShotDirection;
+
+		// 히트 위치
+		FVector ImpactPoint = PointDamageEvent->HitInfo.ImpactPoint;
+
+		// 히트 방향
+		FVector ImpactDirection = PointDamageEvent->HitInfo.ImpactNormal;
+
+		// 히트한 객체의 위치
+		FVector HitLocation = PointDamageEvent->HitInfo.Location;
+
+		ImpactEffect(ImpactPoint);
+		HitReaction(EventInstigator->GetPawn());
+	}
+
+	return ActualDamage;
+}
+
+void ADSCharacter::OnDeath()
+{
+	// 충돌 예외 처리
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Ragdoll
+	GetMesh()->SetCollisionProfileName("Ragdoll");
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetSimulatePhysics(true);
+}
+
+void ADSCharacter::ImpactEffect(const FVector& Location)
+{
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+	}
+
+	if (ImpactParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, Location);
+	}
+}
+
+void ADSCharacter::HitReaction(const AActor* Attacker)
+{
+	UAnimMontage* HitReactAnimMontage = GetHitReactAnimation(Attacker);
+	if (HitReactAnimMontage)
+	{
+		float DelaySeconds = PlayAnimMontage(HitReactAnimMontage);
+	}
+}
+
+UAnimMontage* ADSCharacter::GetHitReactAnimation(const AActor* Attacker) const
+{
+	// 현재 액터가 공격자를 바라보는 회전값
+	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Attacker->GetActorLocation());
+
+	// 현재 액터의 회전값과 LookAt 회전값의 차이
+	const FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(GetActorRotation(), LookAtRotation);
+
+	// Yaw 회전
+	const float DeltaYaw = DeltaRotation.Yaw;
+
+	EHitDirection HitDirection = EHitDirection::Front;
+	if (UKismetMathLibrary::InRange_FloatFloat(DeltaYaw, -45.0f, 45.0f))
+	{
+		HitDirection = EHitDirection::Front;
+	}
+	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaYaw, 45.0f, 135.0f))
+	{
+		HitDirection = EHitDirection::Left;
+	}
+	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaYaw, 135.0f, 180.0f) ||
+		UKismetMathLibrary::InRange_FloatFloat(DeltaYaw, -180.0f, -135.0f))
+	{
+		HitDirection = EHitDirection::Back;
+	}
+	else
+	{
+		HitDirection = EHitDirection::Right;
+	}
+
+	UAnimMontage* SelectedMontage = nullptr;
+	switch (HitDirection)
+	{
+	case EHitDirection::Front:
+		SelectedMontage = HitReactFrontAnimation;
+		break;
+	case EHitDirection::Back:
+		SelectedMontage = HitReactBackAnimation;
+		break;
+	case EHitDirection::Left:
+		SelectedMontage = HitReactLeftAnimation;
+		break;
+	case EHitDirection::Right:
+		SelectedMontage = HitReactRightAnimation;
+		break;
+	default:
+		break;
+	}
+
+	return SelectedMontage;
+
+}
+
+
 bool ADSCharacter::IsMoving()
 {
 	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
@@ -138,6 +267,7 @@ bool ADSCharacter::CanPerformAttack(const FGameplayTag& AttackTypeTag) const
 	FGameplayTagContainer CheckTags;
 	CheckTags.AddTag(DSGameplayTags::Character_State_Rolling);
 	CheckTags.AddTag(DSGameplayTags::Character_State_GeneralAction);
+	CheckTags.AddTag(DSGameplayTags::Character_State_Hit);
 
 	const float StaminaCost = CombatComponet->GetMainWeapon()->GetStaminaCost(AttackTypeTag);
 
@@ -182,6 +312,8 @@ void ADSCharacter::DoAttack(const FGameplayTag& AttackTypeTag)
 		}
 
 		PlayAnimMontage(Montage);
+
+		Weapon->SetLastAttackType(AttackTypeTag);
 
 		const float StaminaCost = Weapon->GetStaminaCost(AttackTypeTag);
 

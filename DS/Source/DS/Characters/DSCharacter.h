@@ -31,6 +31,37 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	// Hit & Death 
+public:
+	virtual void OnDeath();
+
+public:
+	void ImpactEffect(const FVector& Location);
+	void HitReaction(const AActor* Attacker);
+	UAnimMontage* GetHitReactAnimation(const AActor* Attacker) const;
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TObjectPtr<USoundCue> ImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TObjectPtr<UParticleSystem> ImpactParticle;
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Montage | HitReact")
+	TObjectPtr<UAnimMontage> HitReactFrontAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "Montage | HitReact")
+	TObjectPtr<UAnimMontage> HitReactBackAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "Montage | HitReact")
+	TObjectPtr<UAnimMontage> HitReactLeftAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "Montage | HitReact")
+	TObjectPtr<UAnimMontage> HitReactRightAnimation;
+
 /** 캐릭터의 관련 기능 */
 public:
 	bool IsMoving();
