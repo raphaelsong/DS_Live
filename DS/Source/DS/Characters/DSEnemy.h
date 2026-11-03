@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DSDefine.h"
 #include "GameFramework/Character.h"
 #include "DSEnemy.generated.h"
+
+class ATargetPoint;
 
 UCLASS()
 class DS_API ADSEnemy : public ACharacter
@@ -36,6 +39,32 @@ public:
 	void HitReaction(const AActor* Attacker);
 	UAnimMontage* GetHitReactAnimation(const AActor* Attacker) const;
 
+public:
+	void SetupHealthBar();
+
+	void ToggleHealthBarVisibility(bool IsVisibility);
+
+	void OnEnemyAttributeChanged(EDSAttributeType Attribute, float InValue);
+
+
+public:
+	FORCEINLINE ATargetPoint* GetPatrolPoint()
+	{
+		return PatrolPoints.Num() >= (PatrolIndex + 1) ? PatrolPoints[PatrolIndex] : nullptr;
+	}
+
+	FORCEINLINE void IncrementPatrolIndex()
+	{
+		PatrolIndex = (PatrolIndex + 1) % PatrolPoints.Num();
+	}
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "AI | Patrol")
+	TArray<ATargetPoint*> PatrolPoints;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI | Patrol")
+	int32 PatrolIndex = 0;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	TObjectPtr<USoundCue> ImpactSound;
@@ -62,4 +91,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDSStateComponent> StateComponent;
+
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UWidgetComponent> HealthBarWidgetComponent;
 };

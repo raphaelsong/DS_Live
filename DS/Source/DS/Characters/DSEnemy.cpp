@@ -1,6 +1,7 @@
 
 #include "Characters/DSEnemy.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Components/DSAttributeComponent.h"
 #include "Components/DSStateComponent.h"
 #include "DSDefine.h"
@@ -9,6 +10,7 @@
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/DSStatBarWidget.h"
 
 ADSEnemy::ADSEnemy()
 {
@@ -23,14 +25,26 @@ ADSEnemy::ADSEnemy()
 	// 죽음 Delegate 함수에 구독
 	AttributeComponent->OnDeath.AddUObject(this, &ADSEnemy::OnDeath);
 
+	// Health 값 갱신시 호출되도록 구독
+	AttributeComponent->OnAttributeChanged.AddUObject(this, &ADSEnemy::OnEnemyAttributeChanged);
+
 	// 상태 컴포넌트
 	StateComponent = CreateDefaultSubobject<UDSStateComponent>(TEXT("State"));
+
+	// 체력 위젯 컴포넌트
+	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidgetComponent->SetupAttachment(GetRootComponent());
+	HealthBarWidgetComponent->SetRelativeLocation(FVector(0, 0, 100));
+	HealthBarWidgetComponent->SetDrawSize(FVector2D(100.0f, 5.0f));
+	HealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarWidgetComponent->SetVisibility(false);
 }
 
 void ADSEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SetupHealthBar();
 }
 
 void ADSEnemy::Tick(float DeltaTime)
@@ -49,6 +63,8 @@ void ADSEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 float ADSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	ToggleHealthBarVisibility(true);
 
 	if (AttributeComponent)
 	{
@@ -80,6 +96,8 @@ float ADSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 void ADSEnemy::OnDeath()
 {
+	ToggleHealthBarVisibility(false);
+
 	// 충돌 예외 처리
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -162,5 +180,45 @@ UAnimMontage* ADSEnemy::GetHitReactAnimation(const AActor* Attacker) const
 
 	return SelectedMontage;
 
+}
+
+void ADSEnemy::SetupHealthBar()
+{
+	if (HealthBarWidgetComponent)
+	{
+		UDSStatBarWidget* StatBarWidget = Cast<UDSStatBarWidget>(HealthBarWidgetComponent->GetWidget());
+		if (StatBarWidget)
+		{
+			StatBarWidget->SetStatBarColor(FLinearColor::Red);
+		}
+	}
+
+	if (AttributeComponent)
+	{
+		AttributeComponent->BroadcastAttributeChanged(EDSAttributeType::Health);
+	}
+}
+
+void ADSEnemy::ToggleHealthBarVisibility(bool IsVisibility)
+{
+	if (HealthBarWidgetComponent)
+	{
+		HealthBarWidgetComponent->SetVisibility(IsVisibility);
+	}
+}
+
+void ADSEnemy::OnEnemyAttributeChanged(EDSAttributeType Attribute, float InValue)
+{
+	if (Attribute == EDSAttributeType::Health)
+	{
+		if (HealthBarWidgetComponent)
+		{
+			UDSStatBarWidget* StatBarWidget = Cast<UDSStatBarWidget>(HealthBarWidgetComponent->GetWidget());
+			if (StatBarWidget)
+			{
+				StatBarWidget->SetRatio(InValue);
+			}
+		}
+	}
 }
 

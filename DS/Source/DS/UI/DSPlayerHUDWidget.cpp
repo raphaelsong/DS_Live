@@ -22,6 +22,7 @@ void UDSPlayerHUDWidget::NativeConstruct()
 		{
 			Attribute->OnAttributeChanged.AddUObject(this, &UDSPlayerHUDWidget::OnAttributeChanged);
 			Attribute->BroadcastAttributeChanged(EDSAttributeType::Stamina);
+			Attribute->BroadcastAttributeChanged(EDSAttributeType::Health);
 		}
 	}
 }
@@ -34,6 +35,7 @@ void UDSPlayerHUDWidget::OnAttributeChanged(EDSAttributeType AttributeType, floa
 		StaminaBarWidget->SetRatio(InValue);
 		break;
 	case EDSAttributeType::Health:
+		HealthBarWidget->SetRatio(InValue);
 		break;
 	default:
 		break;
