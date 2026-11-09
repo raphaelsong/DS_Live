@@ -6,3 +6,10 @@
 UBTTask_PerformAttack::UBTTask_PerformAttack()
 {
 }
+
+EBTNodeResult::Type UBTTask_PerformAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+
+	return EBTNodeResult::Type();
+}
