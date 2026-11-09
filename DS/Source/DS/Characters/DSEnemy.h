@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "DSDefine.h"
 #include "GameFramework/Character.h"
+#include "Interface/DSAICombatInterface.h"
 #include "DSEnemy.generated.h"
 
 class ATargetPoint;
 
 UCLASS()
-class DS_API ADSEnemy : public ACharacter
+class DS_API ADSEnemy : public ACharacter, public IDSAICombatInterface
 {
 	GENERATED_BODY()
 
@@ -86,13 +87,25 @@ protected:
 	TObjectPtr<UAnimMontage> HitReactRightAnimation;
 
 protected:
+	// 메인무기
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class ADSWeapon> DefaultWeaponClass;
+
+protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDSAttributeComponent> AttributeComponent;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDSStateComponent> StateComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDSCombatComponent> CombatComponent;
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> HealthBarWidgetComponent;
+
+public:
+	// Inherited via IDSAICombatInterface
+	void PerformAttack(FGameplayTag& AttackTag, FOnMontageEnded& MontageEndedDelegate) override;
 };

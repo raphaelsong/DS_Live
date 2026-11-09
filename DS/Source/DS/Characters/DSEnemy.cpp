@@ -4,6 +4,8 @@
 #include "Components/WidgetComponent.h"
 #include "Components/DSAttributeComponent.h"
 #include "Components/DSStateComponent.h"
+#include "Components/DSCombatComponent.h"
+#include "Equipments/DSWeapon.h"
 #include "DSDefine.h"
 #include "GameplayTagContainer.h"
 #include "Sound/SoundCue.h"
@@ -11,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/DSStatBarWidget.h"
+#include "DSGameplayTags.h"
 
 ADSEnemy::ADSEnemy()
 {
@@ -31,6 +34,9 @@ ADSEnemy::ADSEnemy()
 	// 상태 컴포넌트
 	StateComponent = CreateDefaultSubobject<UDSStateComponent>(TEXT("State"));
 
+	// 전투 컴포넌트
+	CombatComponent = CreateDefaultSubobject<UDSCombatComponent>(TEXT("Combat"));
+
 	// 체력 위젯 컴포넌트
 	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidgetComponent->SetupAttachment(GetRootComponent());
@@ -45,6 +51,25 @@ void ADSEnemy::BeginPlay()
 	Super::BeginPlay();
 	
 	SetupHealthBar();
+
+	// 무기 장착
+	if (DefaultWeaponClass)
+	{
+		if (CombatComponent)
+		{
+			CombatComponent->SetCombatEnabled(true);
+		}
+
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Owner = this;
+
+		ADSWeapon* Weapon = GetWorld()->SpawnActor<ADSWeapon>(DefaultWeaponClass, GetActorTransform(), SpawnParam);
+
+		if (Weapon)
+		{
+			Weapon->EquipItem();
+		}
+	}
 }
 
 void ADSEnemy::Tick(float DeltaTime)
@@ -219,6 +244,38 @@ void ADSEnemy::OnEnemyAttributeChanged(EDSAttributeType Attribute, float InValue
 				StatBarWidget->SetRatio(InValue);
 			}
 		}
+	}
+}
+
+void ADSEnemy::PerformAttack(FGameplayTag& AttackTag, FOnMontageEnded& MontageEndedDelegate)
+{
+	check(StateComponent);
+	check(AttributeComponent);
+	check(CombatComponent);
+
+	ADSWeapon* Weapon = CombatComponent->GetMainWeapon();
+	if (Weapon)
+	{
+		StateComponent->SetState(DSGameplayTags::Character_State_Attacking);
+		
+		AttributeComponent->ToggleStaminaRegen(false);
+
+		Weapon->SetLastAttackType(AttackTag);
+
+		UAnimMontage* Montage = Weapon->GetMontageForTag(AttackTag);
+		if (Montage)
+		{
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(Montage);
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, Montage);
+			}
+		}
+
+		const float StaminaCost = Weapon->GetStaminaCost(AttackTag);
+		AttributeComponent->DecreaseStamina(StaminaCost);
+		AttributeComponent->ToggleStaminaRegen(true, 1.5f);
 	}
 }
 

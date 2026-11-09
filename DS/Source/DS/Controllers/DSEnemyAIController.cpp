@@ -5,9 +5,14 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Characters/DSCharacter.h"
 
 ADSEnemyAIController::ADSEnemyAIController()
 {
+	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
+
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ADSEnemyAIController::TargetPerceptionUpdated);
 }
 
 void ADSEnemyAIController::OnPossess(APawn* InPawn)
@@ -40,5 +45,42 @@ void ADSEnemyAIController::StopAI()
 	if (BTComponent)
 	{
 		BTComponent->StopTree();
+	}
+}
+
+void ADSEnemyAIController::SetTarget(AActor* NewTarget)
+{
+	if (IsValid(Blackboard))
+	{
+		Blackboard->SetValueAsObject(FName("TargetActor"), NewTarget);
+	}
+}
+
+void ADSEnemyAIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	ADSCharacter* DSCharacter = Cast<ADSCharacter>(Actor);
+	if (nullptr == DSCharacter)
+	{
+		return;
+	}
+
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		SetTarget(Actor);
+
+		GetWorld()->GetTimerManager().ClearTimer(SightTimerHandle);
+	}
+	else
+	{
+		float LossTime = SightLossTime;
+
+		GetWorld()->GetTimerManager().SetTimer(
+			SightTimerHandle,
+			FTimerDelegate::CreateLambda(
+				[this]()
+				{
+					SetTarget(nullptr);
+				}
+			), LossTime, false);
 	}
 }

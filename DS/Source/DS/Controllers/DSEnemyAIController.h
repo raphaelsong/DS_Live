@@ -25,6 +25,22 @@ public:
 	void RunAI();
 	void StopAI();
 
+public:
+	void SetTarget(AActor* NewTarget);
+
+	UFUNCTION()
+	void TargetPerceptionUpdated(AActor* Actor, struct FAIStimulus Stimulus);
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
+
+	// 플레이어 시각 감지 타이머
+	FTimerHandle SightTimerHandle;
+
+	// 소실 타임
+	float SightLossTime = 3.0f;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = AI)
 	TObjectPtr<class UBlackboardData> BBAsset;
