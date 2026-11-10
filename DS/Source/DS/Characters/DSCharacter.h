@@ -37,6 +37,8 @@ public:
 public:
 	virtual void OnDeath();
 
+	bool IsDeath() const;
+
 public:
 	void ImpactEffect(const FVector& Location);
 	void HitReaction(const AActor* Attacker);

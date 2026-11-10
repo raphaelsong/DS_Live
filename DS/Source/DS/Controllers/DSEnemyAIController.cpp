@@ -64,7 +64,7 @@ void ADSEnemyAIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 		return;
 	}
 
-	if (Stimulus.WasSuccessfullySensed())
+	if (Stimulus.WasSuccessfullySensed() && DSCharacter->IsDeath() == false)
 	{
 		SetTarget(Actor);
 
@@ -73,6 +73,11 @@ void ADSEnemyAIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 	else
 	{
 		float LossTime = SightLossTime;
+
+		if (DSCharacter->IsDeath())
+		{
+			LossTime = 0.1f;
+		}
 
 		GetWorld()->GetTimerManager().SetTimer(
 			SightTimerHandle,

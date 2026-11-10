@@ -1,5 +1,6 @@
 
 #include "Characters/DSEnemy.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/DSAttributeComponent.h"
@@ -18,6 +19,10 @@
 ADSEnemy::ADSEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bUseControllerRotationYaw = false;
+	//GetCharacterMovement()->RotationRate = FRotator(0.0, 360.0f, 0.0f);
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);

@@ -21,6 +21,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
+#include "Perception/AIPerceptionSystem.h"
 
 // Sets default values
 ADSCharacter::ADSCharacter()
@@ -112,6 +113,11 @@ float ADSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		AttributeComponent->TakeDamageAmount(ActualDamage);
 	}
 
+	if (IsDeath())
+	{
+		return 0.0f;
+	}
+
 	StateComponent->SetState(DSGameplayTags::Character_State_Hit);
 	StateComponent->ToggleMovementInput(false);
 
@@ -140,6 +146,18 @@ float ADSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 void ADSCharacter::OnDeath()
 {
+	check(StateComponent);
+
+	StateComponent->SetState(DSGameplayTags::Character_State_Death);
+
+	// AI 감지 시스템 등록 해제
+	UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+	if (PerceptionSystem)
+	{
+		// 해당 캐릭터를 주시하는 AI에게 TargetPerceptionUpdated 실행 하도록 유도
+		PerceptionSystem->UnregisterSource(*this);
+	}
+
 	// 충돌 예외 처리
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -147,6 +165,16 @@ void ADSCharacter::OnDeath()
 	GetMesh()->SetCollisionProfileName("Ragdoll");
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetSimulatePhysics(true);
+}
+
+bool ADSCharacter::IsDeath() const
+{
+	check(StateComponent);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(DSGameplayTags::Character_State_Death);
+
+	return StateComponent->IsCurrentStateEqualToAny(CheckTags);
 }
 
 void ADSCharacter::ImpactEffect(const FVector& Location)
