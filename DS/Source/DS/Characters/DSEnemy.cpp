@@ -15,6 +15,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/DSStatBarWidget.h"
 #include "DSGameplayTags.h"
+#include "Perception/AISense_Damage.h"
+#include "Controllers/DSEnemyAIController.h"
 
 ADSEnemy::ADSEnemy()
 {
@@ -119,6 +121,9 @@ float ADSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 		ImpactEffect(ImpactPoint);
 		HitReaction(EventInstigator->GetPawn());
+
+		// AI 데미지 인식 호출
+		UAISense_Damage::ReportDamageEvent(GetWorld(), this, EventInstigator->GetPawn(), ActualDamage, HitLocation, HitLocation);
 	}
 
 	return ActualDamage;
@@ -126,6 +131,12 @@ float ADSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 void ADSEnemy::OnDeath()
 {
+	ADSEnemyAIController* EnemyAIController = Cast<ADSEnemyAIController>(GetController());
+	if (EnemyAIController)
+	{
+		EnemyAIController->StopAI();
+	}
+
 	ToggleHealthBarVisibility(false);
 
 	// 충돌 예외 처리

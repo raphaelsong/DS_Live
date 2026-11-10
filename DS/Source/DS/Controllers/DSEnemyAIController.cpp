@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Characters/DSCharacter.h"
+#include "Characters/DSEnemy.h"
 
 ADSEnemyAIController::ADSEnemyAIController()
 {
@@ -19,14 +20,16 @@ void ADSEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	ControlledEnemy = Cast<ADSEnemy>(InPawn);
+
 	RunAI();
 }
 
 void ADSEnemyAIController::OnUnPossess()
 {
+	ControlledEnemy = nullptr;
+
 	Super::OnUnPossess();
-
-
 }
 
 void ADSEnemyAIController::RunAI()
@@ -68,6 +71,11 @@ void ADSEnemyAIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 	{
 		SetTarget(Actor);
 
+		if (ControlledEnemy)
+		{
+			ControlledEnemy->ToggleHealthBarVisibility(true);
+		}
+
 		GetWorld()->GetTimerManager().ClearTimer(SightTimerHandle);
 	}
 	else
@@ -85,6 +93,11 @@ void ADSEnemyAIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 				[this]()
 				{
 					SetTarget(nullptr);
+
+					if (ControlledEnemy)
+					{
+						ControlledEnemy->ToggleHealthBarVisibility(false);
+					}
 				}
 			), LossTime, false);
 	}

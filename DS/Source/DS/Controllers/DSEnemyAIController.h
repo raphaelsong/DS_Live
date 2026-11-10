@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
 
+	UPROPERTY()
+	TObjectPtr<class ADSEnemy> ControlledEnemy;
+
 	// 플레이어 시각 감지 타이머
 	FTimerHandle SightTimerHandle;
 
