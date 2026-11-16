@@ -6,6 +6,7 @@
 #include "Components/DSAttributeComponent.h"
 #include "Components/DSStateComponent.h"
 #include "Components/DSCombatComponent.h"
+#include "Components/DSRotationComponent.h"
 #include "Equipments/DSWeapon.h"
 #include "DSDefine.h"
 #include "GameplayTagContainer.h"
@@ -43,6 +44,9 @@ ADSEnemy::ADSEnemy()
 
 	// 전투 컴포넌트
 	CombatComponent = CreateDefaultSubobject<UDSCombatComponent>(TEXT("Combat"));
+
+	// 회전 컴포넌트
+	RotationComponent = CreateDefaultSubobject<UDSRotationComponent>(TEXT("Rotation"));
 
 	// 체력 위젯 컴포넌트
 	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));

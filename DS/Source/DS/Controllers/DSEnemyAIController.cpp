@@ -8,6 +8,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Characters/DSCharacter.h"
 #include "Characters/DSEnemy.h"
+#include "Components/DSRotationComponent.h"
 
 ADSEnemyAIController::ADSEnemyAIController()
 {
@@ -56,6 +57,12 @@ void ADSEnemyAIController::SetTarget(AActor* NewTarget)
 	if (IsValid(Blackboard))
 	{
 		Blackboard->SetValueAsObject(FName("TargetActor"), NewTarget);
+	}
+
+	UDSRotationComponent* RotationComponent = ControlledEnemy->GetComponentByClass<UDSRotationComponent>();
+	if (RotationComponent)
+	{
+		RotationComponent->SetTargetActor(NewTarget);
 	}
 }
 

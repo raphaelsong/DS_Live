@@ -17,6 +17,10 @@ class DS_API UBTDecorator_Chance : public UBTDecorator
 public:
 	UBTDecorator_Chance();
 
+protected:
+	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 
-
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 ChanceRate = 30;
 };

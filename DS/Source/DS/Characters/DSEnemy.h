@@ -100,6 +100,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDSCombatComponent> CombatComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDSRotationComponent> RotationComponent;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
