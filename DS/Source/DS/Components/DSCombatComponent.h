@@ -7,6 +7,7 @@
 #include "DSCombatComponent.generated.h"
 
 class ADSWeapon;
+class ADSShield;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DS_API UDSCombatComponent : public UActorComponent
@@ -27,9 +28,11 @@ public:
 
 public:
 	FORCEINLINE ADSWeapon* GetMainWeapon() const { return MainWeapon; }
+	FORCEINLINE ADSShield* GetShield() const { return Shield; }
 
 public:
 	void SetWeapon(ADSWeapon* NewWeapon);
+	void SetShield(ADSShield* NewShield);
 
 public:
 	FORCEINLINE bool IsCombatEnabled() const				{ return bCombatEnabled;		}
@@ -38,6 +41,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<ADSWeapon> MainWeapon;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<ADSShield> Shield;
 
 	/* 전투 활성화 상태인지?*/
 	UPROPERTY(EditAnywhere)

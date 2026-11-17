@@ -4,6 +4,7 @@
 #include "Components/DSCombatComponent.h"
 #include "Characters/DSCharacter.h"
 #include "Equipments/DSWeapon.h"
+#include "Equipments/DSShield.h"
 #include "Item/DSPickupItem.h"
 
 // Sets default values for this component's properties
@@ -55,5 +56,26 @@ void UDSCombatComponent::SetWeapon(ADSWeapon* NewWeapon)
 	}
 
 	MainWeapon = NewWeapon;
+}
+
+void UDSCombatComponent::SetShield(ADSShield* NewShield)
+{
+	if (IsValid(Shield))
+	{
+		ADSCharacter* OwnerCharacter = Cast<ADSCharacter>(GetOwner());
+		if (OwnerCharacter)
+		{
+			ADSPickupItem* PickupItem = GetWorld()->SpawnActorDeferred<ADSPickupItem>(ADSPickupItem::StaticClass(), OwnerCharacter->GetActorTransform());
+			if (PickupItem)
+			{
+				PickupItem->SetEquipmentClass(Shield->GetClass());
+				PickupItem->FinishSpawning(OwnerCharacter->GetActorTransform());
+
+				Shield->Destroy();
+			}
+		}
+	}
+
+	Shield = NewShield;
 }
 
