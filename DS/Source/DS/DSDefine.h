@@ -23,3 +23,12 @@ enum class EHitDirection : uint8
 	Left,
 	Right,
 };
+
+UENUM(BlueprintType)
+enum class EDSAIBehavior : uint8
+{
+	Idle,
+	Patrol,
+	MeleeAttack,
+	Approach,
+};
